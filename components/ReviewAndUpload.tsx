@@ -1,60 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { Project, Photo } from '../types.ts';
-import Spinner from './Spinner.tsx';
-import { TrashIcon, UploadCloudIcon, ChevronLeftIcon } from './IconComponents.tsx';
+import { TrashIcon, ChevronLeftIcon, DownloadIcon } from './IconComponents.tsx';
 
 interface ReviewAndUploadProps {
   project: Project;
   photos: Photo[];
   setPhotos: (photos: Photo[]) => void;
-  onUploadComplete: () => void;
+  onStartOver: () => void;
   onBack: () => void;
 }
 
-const ReviewAndUpload: React.FC<ReviewAndUploadProps> = ({ project, photos, setPhotos, onUploadComplete, onBack }) => {
-  const [isUploading, setIsUploading] = useState(false);
+const ReviewAndUpload: React.FC<ReviewAndUploadProps> = ({ project, photos, setPhotos, onStartOver, onBack }) => {
 
   const handleDelete = (id: string) => {
     setPhotos(photos.filter(p => p.id !== id));
   };
 
-  const handleUpload = () => {
-    setIsUploading(true);
-    // In a real application, this is where you would loop through photos
-    // and upload them to SharePoint via a backend service (e.g., using Microsoft Graph API).
-    console.log(`Simulating upload of ${photos.length} photos for project ${project.id}...`);
-    photos.forEach(photo => {
-      console.log(`- Uploading ${photo.filename}`);
-    });
-    
-    // Simulate network delay
-    setTimeout(() => {
-      setIsUploading(false);
-      onUploadComplete();
-    }, 2500);
+  const handleIndividualDownload = (photo: Photo) => {
+    const link = document.createElement('a');
+    link.href = photo.dataUrl;
+    link.download = photo.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  if(photos.length === 0 && !isUploading){
-      return (
-          <div className="bg-white p-8 rounded-xl shadow-lg text-center">
-              <h3 className="text-xl font-bold text-slate-700">No photos to review.</h3>
-              <p className="text-slate-500 mt-2 mb-6">Please go back and capture some photos first.</p>
-              <button onClick={onBack} className="bg-slate-200 text-slate-800 font-bold py-2 px-4 rounded-lg hover:bg-slate-300">
-                  Back to Camera
-              </button>
-          </div>
-      )
+  if (photos.length === 0) {
+    return (
+      <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+        <h3 className="text-xl font-bold text-slate-700">No photos to review.</h3>
+        <p className="text-slate-500 mt-2 mb-6">Please go back and capture some photos first.</p>
+        <button onClick={onBack} className="bg-slate-200 text-slate-800 font-bold py-2 px-4 rounded-lg hover:bg-slate-300">
+          Back to Camera
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg animate-fade-in">
       <div className="flex justify-between items-center mb-6">
         <div>
-            <h2 className="text-2xl font-bold text-slate-800">Step 3: Review & Upload</h2>
-            <p className="text-slate-600">For Project: <span className="font-semibold">{project.name}</span></p>
+          <h2 className="text-2xl font-bold text-slate-800">Step 3: Review & Save Photos</h2>
+          <p className="text-slate-600">For Project: <span className="font-semibold">{project.name}</span></p>
         </div>
         <button onClick={onBack} title="Back to Camera" className="p-2 rounded-full hover:bg-slate-100 transition">
-          <ChevronLeftIcon className="w-6 h-6 text-slate-600"/>
+          <ChevronLeftIcon className="w-6 h-6 text-slate-600" />
         </button>
       </div>
 
@@ -62,45 +53,40 @@ const ReviewAndUpload: React.FC<ReviewAndUploadProps> = ({ project, photos, setP
         {photos.map(photo => (
           <div key={photo.id} className="border border-slate-200 p-4 rounded-lg">
             <img src={photo.dataUrl} alt="Review" className="w-full h-auto object-contain rounded-md mb-4" />
-            <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-500 break-all pr-2">
-                    Filename: <span className="font-mono bg-slate-100 p-1 rounded">{photo.filename}</span>
-                </p>
-                <button onClick={() => handleDelete(photo.id)} className="flex-shrink-0 flex items-center gap-2 text-sm text-red-600 hover:text-red-800 font-semibold transition">
-                    <TrashIcon className="w-4 h-4" />
-                    Delete
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <p className="text-xs text-slate-500 break-all pr-2">
+                Filename: <span className="font-mono bg-slate-100 p-1 rounded">{photo.filename}</span>
+              </p>
+              <div className="flex-shrink-0 flex items-center gap-3">
+                <button 
+                  onClick={() => handleIndividualDownload(photo)} 
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-semibold transition"
+                >
+                  <DownloadIcon className="w-5 h-5" />
+                  Download
                 </button>
+                <button 
+                  onClick={() => handleDelete(photo.id)} 
+                  className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 font-semibold transition"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
       
       <div className="mt-8 border-t pt-6">
-          <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md mb-6" role="alert">
-              <p className="font-bold">Ready to Upload?</p>
-              <p className="text-sm">You are about to upload {photos.length} photo(s) to the SharePoint folder for project {project.id}.</p>
-          </div>
-          
-          <button
-            onClick={handleUpload}
-            disabled={isUploading || photos.length === 0}
-            className="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 enabled:hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all transform enabled:hover:scale-105"
-          >
-            {isUploading ? (
-              <>
-                <Spinner />
-                <span>Uploading...</span>
-              </>
-            ) : (
-              <>
-                <UploadCloudIcon className="w-6 h-6" />
-                <span>Confirm & Upload {photos.length} Photo(s)</span>
-              </>
-            )}
-          </button>
-          <p className="text-xs text-center text-slate-500 mt-3">This action cannot be undone.</p>
+        <p className="text-center text-slate-600 mb-4">Once you have saved all necessary photos, you can start a new quality check.</p>
+        <button
+          onClick={onStartOver}
+          className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all transform hover:scale-105"
+        >
+          Start New Quality Check
+        </button>
       </div>
-
     </div>
   );
 };
