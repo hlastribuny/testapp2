@@ -1,0 +1,16 @@
+{
+  "name": "Quality Check Photos",
+  "short_name": "QualityApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "description": "A streamlined application for construction site quality check photos.",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

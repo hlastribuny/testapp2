@@ -1,0 +1,7 @@
+{
+  "name": "Quality Check Photos",
+  "description": "A streamlined application for construction site quality check photos. Users can select a project, take photos with their device, get instant AI-powered quality feedback, and upload them to a central repository. Designed for ease of use by shopfloor personnel.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
