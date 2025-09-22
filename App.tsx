@@ -2,14 +2,20 @@ import React, { useState, useCallback } from 'react';
 import ProjectSelector from './components/ProjectSelector';
 import CameraView from './components/CameraView';
 import ReviewAndUpload from './components/ReviewAndUpload';
+import ApiKeyInput from './components/ApiKeyInput';
 import { Header, CheckCircleIcon } from './components/IconComponents';
 import type { Project, Photo } from './types';
 import { AppStep } from './types';
 
 const App: React.FC = () => {
+  const [apiKey, setApiKey] = useState<string>('');
   const [currentStep, setCurrentStep] = useState<AppStep>(AppStep.SELECT_PROJECT);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
+
+  const handleApiKeySubmit = (key: string) => {
+    setApiKey(key);
+  };
 
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
@@ -30,13 +36,16 @@ const App: React.FC = () => {
     setCurrentStep(AppStep.SELECT_PROJECT);
   }, []);
 
-  const renderStep = () => {
+  const renderContent = () => {
+    if (!apiKey) {
+      return <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />;
+    }
+
     switch (currentStep) {
       case AppStep.SELECT_PROJECT:
         return <ProjectSelector onProjectSelect={handleProjectSelect} />;
       case AppStep.TAKE_PHOTOS:
-        // FIX: Pass the setPhotos state setter directly to CameraView.
-        return <CameraView project={selectedProject!} onReview={handleReview} photos={photos} setPhotos={setPhotos} />;
+        return <CameraView project={selectedProject!} apiKey={apiKey} onReview={handleReview} photos={photos} setPhotos={setPhotos} />;
       case AppStep.REVIEW_UPLOAD:
         return <ReviewAndUpload project={selectedProject!} photos={photos} setPhotos={setPhotos} onUploadComplete={handleUploadComplete} onBack={() => setCurrentStep(AppStep.TAKE_PHOTOS)} />;
       case AppStep.COMPLETE:
@@ -63,7 +72,7 @@ const App: React.FC = () => {
       <div className="w-full max-w-2xl mx-auto">
         <Header />
         <main className="mt-8">
-          {renderStep()}
+          {renderContent()}
         </main>
       </div>
     </div>
