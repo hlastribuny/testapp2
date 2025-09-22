@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { ExclamationTriangleIcon } from './IconComponents';
-import Spinner from './Spinner';
+import { ExclamationTriangleIcon } from './IconComponents.tsx';
+import Spinner from './Spinner.tsx';
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;

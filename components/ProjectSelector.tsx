@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import type { Project } from '../types';
-import { MOCK_PROJECTS } from '../constants';
-import { SearchIcon, ChevronRightIcon, BarcodeScannerIcon } from './IconComponents';
-import BarcodeScanner from './BarcodeScanner';
+import type { Project } from '../types.ts';
+import { MOCK_PROJECTS } from '../constants.ts';
+import { SearchIcon, ChevronRightIcon, BarcodeScannerIcon } from './IconComponents.tsx';
+import BarcodeScanner from './BarcodeScanner.tsx';
 
 interface ProjectSelectorProps {
   onProjectSelect: (project: Project) => void;

@@ -10,7 +10,6 @@ const urlsToCache = [
   '/App.tsx',
   '/types.ts',
   '/constants.ts',
-  '/services/geminiService.ts',
   '/components/ProjectSelector.tsx',
   '/components/CameraView.tsx',
   '/components/ReviewAndUpload.tsx',

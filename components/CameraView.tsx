@@ -1,15 +1,12 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import type { Project, Photo } from '../types';
-import { AIAnalysisStatus } from '../types';
-import { analyzeImage } from '../services/geminiService';
-import Spinner from './Spinner';
-import { CameraIcon, CheckCircleIcon, ExclamationTriangleIcon, TrashIcon, ChevronRightIcon } from './IconComponents';
+import type { Project, Photo } from '../types.ts';
+import { CameraIcon, TrashIcon, ChevronRightIcon } from './IconComponents.tsx';
+import Spinner from './Spinner.tsx'; // Spinner is kept for potential future loading states, but not used for analysis.
 
 interface CameraViewProps {
   project: Project;
   onReview: () => void;
   photos: Photo[];
-  // FIX: Update type to allow functional updates for state, resolving the error.
   setPhotos: React.Dispatch<React.SetStateAction<Photo[]>>;
 }
 
@@ -65,44 +62,15 @@ const CameraView: React.FC<CameraViewProps> = ({ project, onReview, photos, setP
         id: new Date().toISOString(),
         dataUrl,
         filename: newFilename,
-        analysisStatus: AIAnalysisStatus.PENDING,
       };
 
-      // FIX: Use functional update to prevent race conditions from rapid captures.
       setPhotos(prevPhotos => [...prevPhotos, newPhoto]);
-
-      // Start AI analysis
-      const analysisResult = await analyzeImage(dataUrl);
-      setPhotos(prevPhotos => prevPhotos.map(p => 
-        p.id === newPhoto.id 
-        ? { ...p, analysisStatus: AIAnalysisStatus.SUCCESS, analysisResult }
-        : p
-      ));
     }
   };
 
   const handleDelete = (id: string) => {
-    // FIX: Use functional update to prevent race conditions when deleting.
     setPhotos(prevPhotos => prevPhotos.filter(p => p.id !== id));
   };
-  
-  const renderThumbnailStatus = (photo: Photo) => {
-      switch(photo.analysisStatus) {
-          case AIAnalysisStatus.PENDING:
-              return <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"><Spinner /></div>;
-          case AIAnalysisStatus.SUCCESS:
-              const isGood = photo.analysisResult?.isClear && photo.analysisResult?.isWellLit;
-              return (
-                  <div className={`absolute bottom-0 right-0 m-1 p-0.5 rounded-full ${isGood ? 'bg-green-500' : 'bg-yellow-500'}`}>
-                      {isGood ? <CheckCircleIcon className="w-4 h-4 text-white"/> : <ExclamationTriangleIcon className="w-4 h-4 text-white"/>}
-                  </div>
-              )
-          case AIAnalysisStatus.ERROR:
-              return <div className="absolute bottom-0 right-0 m-1 p-0.5 bg-red-500 rounded-full"><ExclamationTriangleIcon className="w-4 h-4 text-white"/></div>;
-          default:
-              return null;
-      }
-  }
 
   return (
     <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg animate-fade-in">
@@ -112,7 +80,7 @@ const CameraView: React.FC<CameraViewProps> = ({ project, onReview, photos, setP
       <div className="relative w-full aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden mb-4">
         {error ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-white p-4">
-            <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mb-4" />
+            <h3 className="text-lg font-bold text-red-400">Camera Error</h3>
             <p className="font-semibold">{error}</p>
             <button onClick={startCamera} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Retry</button>
           </div>
@@ -137,9 +105,8 @@ const CameraView: React.FC<CameraViewProps> = ({ project, onReview, photos, setP
             {photos.map(photo => (
               <div key={photo.id} className="relative aspect-square group">
                 <img src={photo.dataUrl} alt="Captured" className="w-full h-full object-cover rounded-md" />
-                {renderThumbnailStatus(photo)}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                    <button onClick={() => handleDelete(photo.id)} className="p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300">
+                    <button onClick={() => handleDelete(photo.id)} className="p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300" aria-label="Delete photo">
                         <TrashIcon className="w-5 h-5"/>
                     </button>
                 </div>

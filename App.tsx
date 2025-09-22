@@ -1,21 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import ProjectSelector from './components/ProjectSelector';
-import CameraView from './components/CameraView';
-import ReviewAndUpload from './components/ReviewAndUpload';
-import ApiKeyInput from './components/ApiKeyInput';
-import { Header, CheckCircleIcon } from './components/IconComponents';
-import type { Project, Photo } from './types';
-import { AppStep } from './types';
+import ProjectSelector from './components/ProjectSelector.tsx';
+import CameraView from './components/CameraView.tsx';
+import ReviewAndUpload from './components/ReviewAndUpload.tsx';
+import { Header, CheckCircleIcon } from './components/IconComponents.tsx';
+import type { Project, Photo } from './types.ts';
+import { AppStep } from './types.ts';
 
 const App: React.FC = () => {
-  const [apiKey, setApiKey] = useState<string>('');
   const [currentStep, setCurrentStep] = useState<AppStep>(AppStep.SELECT_PROJECT);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
-
-  const handleApiKeySubmit = (key: string) => {
-    setApiKey(key);
-  };
 
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
@@ -36,16 +30,18 @@ const App: React.FC = () => {
     setCurrentStep(AppStep.SELECT_PROJECT);
   }, []);
 
-  const renderContent = () => {
-    if (!apiKey) {
-      return <ApiKeyInput onApiKeySubmit={handleApiKeySubmit} />;
-    }
-
+  const renderStep = () => {
     switch (currentStep) {
       case AppStep.SELECT_PROJECT:
         return <ProjectSelector onProjectSelect={handleProjectSelect} />;
       case AppStep.TAKE_PHOTOS:
-        return <CameraView project={selectedProject!} apiKey={apiKey} onReview={handleReview} photos={photos} setPhotos={setPhotos} />;
+        if (!selectedProject) {
+          // This is a failsafe. In normal flow, this should not be reached.
+          // If it is, go back to the project selection step.
+          setCurrentStep(AppStep.SELECT_PROJECT);
+          return null;
+        }
+        return <CameraView project={selectedProject} onReview={handleReview} photos={photos} setPhotos={setPhotos} />;
       case AppStep.REVIEW_UPLOAD:
         return <ReviewAndUpload project={selectedProject!} photos={photos} setPhotos={setPhotos} onUploadComplete={handleUploadComplete} onBack={() => setCurrentStep(AppStep.TAKE_PHOTOS)} />;
       case AppStep.COMPLETE:
@@ -72,7 +68,7 @@ const App: React.FC = () => {
       <div className="w-full max-w-2xl mx-auto">
         <Header />
         <main className="mt-8">
-          {renderContent()}
+          {renderStep()}
         </main>
       </div>
     </div>

@@ -3,24 +3,17 @@ export interface Project {
   name: string;
 }
 
-export enum AIAnalysisStatus {
-  PENDING = 'PENDING',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
-}
-
-export interface AIAnalysisResult {
-  isClear: boolean;
-  isWellLit: boolean;
-  issues: string;
-}
-
 export interface Photo {
   id: string;
   dataUrl: string;
   filename: string;
-  analysisStatus: AIAnalysisStatus;
-  analysisResult?: AIAnalysisResult;
+}
+
+// FIX: Add AIAnalysisResult interface for type safety with Gemini API responses.
+export interface AIAnalysisResult {
+  isClear: boolean;
+  isWellLit: boolean;
+  issues: string;
 }
 
 export enum AppStep {

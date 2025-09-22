@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import type { Project, Photo, AIAnalysisResult } from '../types';
-import { AIAnalysisStatus } from '../types';
-import Spinner from './Spinner';
-import { CheckCircleIcon, ExclamationTriangleIcon, TrashIcon, UploadCloudIcon, ChevronLeftIcon } from './IconComponents';
+import type { Project, Photo } from '../types.ts';
+import Spinner from './Spinner.tsx';
+import { TrashIcon, UploadCloudIcon, ChevronLeftIcon } from './IconComponents.tsx';
 
 interface ReviewAndUploadProps {
   project: Project;
@@ -11,32 +10,6 @@ interface ReviewAndUploadProps {
   onUploadComplete: () => void;
   onBack: () => void;
 }
-
-const AIAnalysisCard: React.FC<{ analysisResult?: AIAnalysisResult }> = ({ analysisResult }) => {
-    if (!analysisResult) {
-        return <div className="p-3 bg-slate-100 rounded-md text-sm text-slate-600">AI analysis is pending...</div>
-    }
-    
-    const { isClear, isWellLit, issues } = analysisResult;
-    
-    return (
-        <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
-                {isClear ? <CheckCircleIcon className="w-5 h-5 text-green-500" /> : <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500" />}
-                <span className={isClear ? 'text-slate-700' : 'text-yellow-700 font-semibold'}>{isClear ? 'Image is Clear' : 'Image May Be Blurry'}</span>
-            </div>
-             <div className="flex items-center gap-2">
-                {isWellLit ? <CheckCircleIcon className="w-5 h-5 text-green-500" /> : <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500" />}
-                <span className={isWellLit ? 'text-slate-700' : 'text-yellow-700 font-semibold'}>{isWellLit ? 'Good Lighting' : 'Poor Lighting Detected'}</span>
-            </div>
-            <div>
-                <p className="font-semibold text-slate-800">Notes:</p>
-                <p className="text-slate-600 pl-2 border-l-2 border-slate-200">{issues}</p>
-            </div>
-        </div>
-    );
-};
-
 
 const ReviewAndUpload: React.FC<ReviewAndUploadProps> = ({ project, photos, setPhotos, onUploadComplete, onBack }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -87,27 +60,16 @@ const ReviewAndUpload: React.FC<ReviewAndUploadProps> = ({ project, photos, setP
 
       <div className="space-y-6">
         {photos.map(photo => (
-          <div key={photo.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 p-4 rounded-lg">
-            <div className="relative">
-              <img src={photo.dataUrl} alt="Review" className="w-full h-auto object-contain rounded-md" />
-            </div>
-            <div>
-              <h4 className="font-bold text-lg text-slate-800 mb-2">AI Quality Analysis</h4>
-              {photo.analysisStatus === AIAnalysisStatus.PENDING && (
-                <div className="flex items-center gap-2 text-slate-500">
-                  <Spinner />
-                  <span>Analyzing...</span>
-                </div>
-              )}
-              {photo.analysisStatus === AIAnalysisStatus.SUCCESS && <AIAnalysisCard analysisResult={photo.analysisResult} />}
-              {photo.analysisStatus === AIAnalysisStatus.ERROR && <p className="text-red-600">Analysis failed.</p>}
-              
-              <p className="mt-4 text-xs text-slate-500">Filename: <span className="font-mono bg-slate-100 p-1 rounded">{photo.filename}</span></p>
-              
-              <button onClick={() => handleDelete(photo.id)} className="mt-4 flex items-center gap-2 text-sm text-red-600 hover:text-red-800 font-semibold transition">
-                  <TrashIcon className="w-4 h-4" />
-                  Delete Photo
-              </button>
+          <div key={photo.id} className="border border-slate-200 p-4 rounded-lg">
+            <img src={photo.dataUrl} alt="Review" className="w-full h-auto object-contain rounded-md mb-4" />
+            <div className="flex justify-between items-center">
+                <p className="text-xs text-slate-500 break-all pr-2">
+                    Filename: <span className="font-mono bg-slate-100 p-1 rounded">{photo.filename}</span>
+                </p>
+                <button onClick={() => handleDelete(photo.id)} className="flex-shrink-0 flex items-center gap-2 text-sm text-red-600 hover:text-red-800 font-semibold transition">
+                    <TrashIcon className="w-4 h-4" />
+                    Delete
+                </button>
             </div>
           </div>
         ))}

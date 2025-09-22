@@ -1,22 +1,16 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import type { AIAnalysisResult } from '../types';
-
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  console.warn("API_KEY environment variable not set. Gemini API calls will fail.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
+import type { AIAnalysisResult } from '../types.ts';
 
 // Utility function to convert base64 data URL to just the base64 string
 function dataUrlToBase64(dataUrl: string): string {
   return dataUrl.split(',')[1];
 }
 
+// FIX: Removed apiKey parameter to adhere to security guidelines of using environment variables.
 export const analyzeImage = async (imageDataUrl: string): Promise<AIAnalysisResult> => {
   try {
+    // FIX: Initialize GoogleGenAI with API key from environment variables as per guidelines.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const base64Image = dataUrlToBase64(imageDataUrl);
 
     const response = await ai.models.generateContent({
@@ -65,7 +59,8 @@ export const analyzeImage = async (imageDataUrl: string): Promise<AIAnalysisResu
     return {
       isClear: false,
       isWellLit: false,
-      issues: "AI analysis failed. Please check image and try again.",
+      // FIX: Updated error message to not reference API key issues.
+      issues: "AI analysis failed. Please try again.",
     };
   }
 };

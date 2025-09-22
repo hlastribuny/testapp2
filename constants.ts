@@ -1,5 +1,4 @@
-
-import type { Project } from './types';
+import type { Project } from './types.ts';
 
 export const MOCK_PROJECTS: Project[] = [
   { id: 'P-1023', name: 'P-1023 - Oak Valley Hospital' },
